@@ -1,42 +1,36 @@
 package com.example.demo.manage;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.assembler.UserAssembler;
 import com.example.demo.model.User;
-import com.example.demo.repository.UserRepository;
+import com.example.demo.response.dto.UserResponseDto;
 import com.example.demo.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
 @RequestMapping(value = "/search")
 public class ManageUser {
 
-	private UserRepository userRepository;
 	
 	//Added UserSerivce
 	@Autowired
 	private UserService userService;
-
-	@Autowired
-	public void setUserRepository(UserRepository userRepository) {
-		this.userRepository = userRepository;
-	}
 	
+	@Autowired
+	private UserAssembler userAssembler;
+
 	//@RequestMapping(value = "/name",method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE })
 	//public String searchUserByName(@RequestParam("name") String name) throws JsonProcessingException {
 		/*
@@ -46,12 +40,13 @@ public class ManageUser {
 		 */
 	//}
 	
-	@RequestMapping(value = "/name",method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE })
-	  public ResponseEntity<List<User>> searchUserByNames(@RequestParam("name") String name) throws JsonProcessingException 
+	@GetMapping(value = "/name", produces = {MediaType.APPLICATION_JSON_VALUE })
+	  public ResponseEntity<UserResponseDto> searchUserByNames(@RequestParam("name") String name) throws JsonProcessingException 
 		{
-		List<User> jsonInList= userService.getsearchUserByName(name); 
+		List<User> user= userService.getsearchUserByName(name);
+		UserResponseDto response = userAssembler.toModel(user,Optional.ofNullable(null));
 		HttpHeaders responseHeaders = new HttpHeaders(); 
-		return new ResponseEntity<>(jsonInList,responseHeaders,HttpStatus.ACCEPTED); 
+		return new ResponseEntity<>(response,responseHeaders,HttpStatus.ACCEPTED); 
 		}
 	 
 		
@@ -64,29 +59,26 @@ public class ManageUser {
 	 */
 	
 
-	@RequestMapping(value = "/id",method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> searchUserById(@RequestParam("id") String id) throws JsonProcessingException {
-		String jsonInString = userService.getsearchUserById(id);
+	@GetMapping(value = "/id", produces = {MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<UserResponseDto> searchUserById(@RequestParam("id") String id) throws JsonProcessingException {
+		Optional<User> user = userService.getsearchUserById(id);
+		UserResponseDto response = userAssembler.toModel(null,user);
 		HttpHeaders respHeaders= new HttpHeaders();
-		System.out.println("jsonInString is:" +jsonInString);
-		
-		//Check if Data Found from the id provided
-		if(jsonInString.equals("Data Not Found"))
-		{
-			return new ResponseEntity<>(jsonInString,respHeaders,HttpStatus.NOT_FOUND);
-		}
-		return new ResponseEntity<>(jsonInString,respHeaders,HttpStatus.ACCEPTED);
+		return new ResponseEntity<>(response,respHeaders,HttpStatus.ACCEPTED);
 	}
 
-	@RequestMapping(value = "/project",method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE })
-	public String searchbyProjectName(@RequestParam("project") String project) throws JsonProcessingException {
-	    String jsonInString = userService.getsearchbyProjectName(project);
-		return jsonInString;
+	@GetMapping(value = "/project", produces = {MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<UserResponseDto> searchbyProjectName(@RequestParam("project") String project) throws JsonProcessingException {
+	    List<User> user = userService.getsearchbyProjectName(project);
+	    UserResponseDto response = userAssembler.toModel(user,Optional.ofNullable(null));
+		HttpHeaders responseHeaders = new HttpHeaders(); 
+		return new ResponseEntity<>(response,responseHeaders,HttpStatus.ACCEPTED); 
 	}
 	
-	@RequestMapping(value = "/allprojects",method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE })
-	public String searchbyClickProject() throws JsonProcessingException {
-		String jsonInString = userService.getsearchbyClickProject();
-		return jsonInString;
+	@GetMapping(value = "/allprojects", produces = {MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<List<String>> searchbyClickProject() throws JsonProcessingException {
+		List<String> jsonInString = userService.getsearchbyClickProject();
+		HttpHeaders respHeaders= new HttpHeaders();
+		return new ResponseEntity<>(jsonInString,respHeaders,HttpStatus.ACCEPTED);
 	}
 }
