@@ -11,8 +11,7 @@ public class UserResponseDto implements Serializable{
 	List<UserDto> users;
 	
 	public UserResponseDto() {
-		// TODO Auto-generated constructor stub
-	}
+		 	}
 
 	public List<UserDto> getUsers() {
 		return users;
