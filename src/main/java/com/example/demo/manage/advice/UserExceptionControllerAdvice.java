@@ -1,7 +1,6 @@
 package com.example.demo.manage.advice;
 
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -15,7 +14,6 @@ public class UserExceptionControllerAdvice {
 	@ExceptionHandler(UserException.class)
 	public ResponseEntity<String> handleUserException(UserException userException)
 	{	
-		   HttpHeaders responseHeaders = new HttpHeaders();
-		   return new ResponseEntity<String>(userException.toString(), responseHeaders, HttpStatus.BAD_REQUEST); 
+		   return new ResponseEntity<String>(userException.toString(),userException.getHttpStatus()); 
 	}
 }
