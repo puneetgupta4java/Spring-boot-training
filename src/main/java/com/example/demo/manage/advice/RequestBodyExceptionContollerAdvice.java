@@ -1,26 +1,34 @@
 package com.example.demo.manage.advice;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
+
+import com.example.demo.commons.Constants;
+
+import org.json.JSONArray;
+
 
 @ControllerAdvice
 public class RequestBodyExceptionContollerAdvice {
 	
 //Used to handle Invalid JSON format Data
 	
+	@SuppressWarnings("all")
 	@ExceptionHandler({org.springframework.http.converter.HttpMessageNotReadableException.class})
-	@ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
-	@ResponseBody
-	public String resolveException() {
+	public ResponseEntity<String> resolveException() {
 		
-		String str1= "\n[\n\t{\n\t\"id\": 123456\",\n\t\"name\": \"Ashi\"\n\t},\n\t {\n\t\"id\": 7890123\",\n\t\"name\": \"Bindal\"\n\t},\n\t.\n\t.\n]";
+		JSONArray array=null;
+		try {
+			array = new JSONArray(Constants.JSON_ARR_STR);
+		
+		} catch (Exception e) {
+			e.printStackTrace();
+		} 
 
-				//Read more: https://www.java67.com/2016/10/3-ways-to-convert-string-to-json-object-in-java.html#ixzz6jFdvCHU0
-		
-	    return "Input JSON Format.Acceptable Format: " + str1;
+		return new ResponseEntity<>("Wrong Input JSON Format.Acceptable Format Example: " + array ,HttpStatus.BAD_REQUEST);
+	    
 	
 	}
 
