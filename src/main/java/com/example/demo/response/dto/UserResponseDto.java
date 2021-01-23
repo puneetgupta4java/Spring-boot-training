@@ -11,7 +11,8 @@ public class UserResponseDto implements Serializable{
 	List<UserDto> users;
 	
 	public UserResponseDto() {
-		 	}
+		 
+	}
 
 	public List<UserDto> getUsers() {
 		return users;

@@ -20,6 +20,10 @@ import com.example.demo.response.dto.UserDto;
 import com.example.demo.response.dto.UserResponseDto;
 import com.example.demo.service.CrudService;
 
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import net.bytebuddy.implementation.bind.annotation.Pipe;
+
 
 //Added Code to perform CRUD operations
 
@@ -38,7 +42,10 @@ public class CrudUser  {
 	
 	//One DataSet will be updated at a Time
 	@PutMapping(value={"update"},consumes= MediaType.APPLICATION_JSON_VALUE,produces = { "application/json" })
-	public ResponseEntity<UserDto> saveorUpdateUser(@RequestBody User user)
+	@ApiOperation(value="Update the User By ID",
+	notes="Enter the Data in JSON Format to Update User",
+	response=UserDto.class)
+	public ResponseEntity<UserDto> saveorUpdateUser(@ApiParam(value="User Data in JSON Format")@RequestBody User user)
 	{
 		User usr = crudService.saveOrUpdateUser(user);
 		UserDto response = updateUserAssembler.toModel(usr);
@@ -47,7 +54,10 @@ public class CrudUser  {
 	
 	
 	@PostMapping(value={"add"},consumes= MediaType.APPLICATION_JSON_VALUE,produces = { "application/json" })
-	public ResponseEntity<UserResponseDto> addUser(@RequestBody List<User> user)
+	@ApiOperation(value="Add User",
+	notes="Enter User Data in JSON Array Format",
+	response=UserResponseDto.class)
+	public ResponseEntity<UserResponseDto> addUser(@ApiParam(value="User Data in JSON Format")@RequestBody List<User> user)
 	{
 		List<User> users = crudService.addUser(user);
 		UserResponseDto response = userAssembler.toModel(users);
@@ -55,7 +65,9 @@ public class CrudUser  {
 	}
 	
 	@DeleteMapping(value= {"/delete/{id}"})
-	public ResponseEntity<String> deleteUser(@PathVariable("id") String id)
+	@ApiOperation(value="Delete User by ID",
+	notes="Enter User ID to remove User")
+	public ResponseEntity<String> deleteUser(@ApiParam(value="Enter UserID")@PathVariable("id") String id)
 	{
 		String s= crudService.deleteUser(id);
 		return new ResponseEntity<>(s,HttpStatus.ACCEPTED);
