@@ -28,8 +28,6 @@ public class RequestBodyExceptionContollerAdvice {
 		} 
 
 		return new ResponseEntity<>("Wrong Input JSON Format.Acceptable Format Example: " + array ,HttpStatus.BAD_REQUEST);
-	    
-	
 	}
 
 }

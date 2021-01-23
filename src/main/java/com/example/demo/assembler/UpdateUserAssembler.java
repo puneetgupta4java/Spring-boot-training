@@ -2,11 +2,12 @@ package com.example.demo.assembler;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.example.demo.model.User;
 import com.example.demo.response.dto.UserDto;
 
-
+@Component
 public class UpdateUserAssembler {
 	
 	@Autowired
