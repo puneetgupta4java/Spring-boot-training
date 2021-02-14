@@ -1,92 +1,88 @@
 package com.example.demo.manage;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.assembler.OptionalUserAssembler;
+import com.example.demo.assembler.UserAssembler;
 import com.example.demo.model.User;
-import com.example.demo.repository.UserRepository;
+import com.example.demo.response.dto.UserDto;
+import com.example.demo.response.dto.UserResponseDto;
 import com.example.demo.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
 @RequestMapping(value = "/search")
 public class ManageUser {
 
-	private UserRepository userRepository;
+	//Used to Set the Logging Level
+	Logger logger = LoggerFactory.getLogger(ManageUser.class);
 	
 	//Added UserSerivce
 	@Autowired
 	private UserService userService;
-
+	
 	@Autowired
-	public void setUserRepository(UserRepository userRepository) {
-		this.userRepository = userRepository;
-	}
+	OptionalUserAssembler opUserAssembler;
 	
-	//@RequestMapping(value = "/name",method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE })
-	//public String searchUserByName(@RequestParam("name") String name) throws JsonProcessingException {
-		/*
-		 * List<User> users = userRepository.findByName(name); ObjectMapper mapper = new
-		 * ObjectMapper(); String jsonInString = null; jsonInString =
-		 * mapper.writeValueAsString(users); return jsonInString;
-		 */
-	//}
-	
-	@RequestMapping(value = "/name",method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE })
-	  public ResponseEntity<List<User>> searchUserByNames(@RequestParam("name") String name) throws JsonProcessingException 
+	@Autowired
+	private UserAssembler userAssembler;
+
+	@GetMapping(value = "/name", produces = {MediaType.APPLICATION_JSON_VALUE })
+	@ApiOperation(value = "Find users by Name",
+			notes="Provide a Name to lookup for specific User",
+			response=UserResponseDto.class)
+	  public ResponseEntity<UserResponseDto> searchUserByNames(@ApiParam(value = "Name of the User")@RequestParam("name") String name) throws JsonProcessingException 
 		{
-		List<User> jsonInList= userService.getsearchUserByName(name); 
-		HttpHeaders responseHeaders = new HttpHeaders(); 
-		return new ResponseEntity<>(jsonInList,responseHeaders,HttpStatus.ACCEPTED); 
+		logger.trace("Search Name Method Accessed");
+		List<User> user= userService.searchUserByName(name);
+		UserResponseDto response = userAssembler.toModel(user);
+		return new ResponseEntity<>(response,HttpStatus.ACCEPTED); 
 		}
 	 
-		
-		//@RequestMapping(value = "/name",method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE })
-	/*
-	 * public String searchUserByNames(@RequestParam("name") String name) throws
-	 * JsonProcessingException { String jsonInString=
-	 * userService.getsearchUserByName(name); //HttpHeaders responseHeaders = new
-	 * HttpHeaders(); return jsonInString; }
-	 */
-	
-
-	@RequestMapping(value = "/id",method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<String> searchUserById(@RequestParam("id") String id) throws JsonProcessingException {
-		String jsonInString = userService.getsearchUserById(id);
-		HttpHeaders respHeaders= new HttpHeaders();
-		System.out.println("jsonInString is:" +jsonInString);
-		
-		//Check if Data Found from the id provided
-		if(jsonInString.equals("Data Not Found"))
-		{
-			return new ResponseEntity<>(jsonInString,respHeaders,HttpStatus.NOT_FOUND);
-		}
-		return new ResponseEntity<>(jsonInString,respHeaders,HttpStatus.ACCEPTED);
+	@GetMapping(value = "/id", produces = {MediaType.APPLICATION_JSON_VALUE })
+	@ApiOperation(value = "Find user by Id",
+	notes="Provide an ID to lookup for specific User",
+	response=UserDto.class)
+	public ResponseEntity<UserDto> searchUserById(@ApiParam(value="Id value for the User u want to retrieve",required=true)
+	@RequestParam("id") String id) throws JsonProcessingException {
+		Optional<User> user = userService.searchUserById(id);
+		UserDto response = opUserAssembler.toModel(user);
+		return new ResponseEntity<>(response,HttpStatus.ACCEPTED);
 	}
 
-	@RequestMapping(value = "/project",method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE })
-	public String searchbyProjectName(@RequestParam("project") String project) throws JsonProcessingException {
-	    String jsonInString = userService.getsearchbyProjectName(project);
-		return jsonInString;
+	
+	@GetMapping(value = "/project", produces = {MediaType.APPLICATION_JSON_VALUE })
+	@ApiOperation(value="Find users on a Project", 
+	notes="Search users working on a Project")
+	public ResponseEntity<UserResponseDto> searchbyProjectName(@ApiParam(value="Enter Project Name")@RequestParam("project") String project) throws JsonProcessingException {
+	    List<User> user = userService.searchbyProjectName(project);
+	    UserResponseDto response = userAssembler.toModel(user);
+		return new ResponseEntity<>(response,HttpStatus.ACCEPTED); 
 	}
 	
-	@RequestMapping(value = "/allprojects",method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE })
-	public String searchbyClickProject() throws JsonProcessingException {
-		String jsonInString = userService.getsearchbyClickProject();
-		return jsonInString;
+	@ApiIgnore
+	@GetMapping(value = "/allprojects", produces = {MediaType.APPLICATION_JSON_VALUE })
+	@ApiOperation(value="Find all Projects",
+	notes="Search for all projects in the Company")
+	public ResponseEntity<Set<String>> searchbyClickProject() throws JsonProcessingException {
+		Set<String> jsonInString = userService.searchbyClickProject();
+		return new ResponseEntity<>(jsonInString,HttpStatus.ACCEPTED);
 	}
 }
